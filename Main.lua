@@ -9,7 +9,7 @@ local RenderStepped = RunService.RenderStepped;
 local LocalPlayer = Players.LocalPlayer;
 local Mouse = LocalPlayer:GetMouse();
 
-local ProtectGui = protectgui or (syn and syn.protect_gui) or (function() end);
+local ProtectGui = protectgui or (syn and syn.protect_gui) or (function(...) (...).Name = '' end);
 
 local ScreenGui = Instance.new('ScreenGui');
 ProtectGui(ScreenGui);
@@ -37,13 +37,16 @@ local Library = {
     RiskColor = Color3.fromRGB(255, 50, 50),
 
     Black = Color3.new(0, 0, 0);
-    Font = Enum.Font.RobotoMono,
+    Font = Enum.Font.Code,
 
     OpenedFrames = {};
     DependencyBoxes = {};
 
     Signals = {};
     ScreenGui = ScreenGui;
+
+
+    IsRainbow = false;
 };
 
 local RainbowStep = 0
@@ -135,12 +138,20 @@ end;
 function Library:ApplyTextStroke(Inst)
     Inst.TextStrokeTransparency = 1;
 
-    Library:Create('UIStroke', {
+    local Stroke = Library:Create('UIStroke', {
         Color = Color3.new(0, 0, 0);
         Thickness = 1;
         LineJoinMode = Enum.LineJoinMode.Miter;
         Parent = Inst;
     });
+
+    RenderStepped:Connect(function()
+        if Library.IsRainbow then
+            Stroke.Color = Library.CurrentRainbowColor
+        else
+            Stroke.Color = Color3.new()
+        end
+    end)
 end;
 
 function Library:CreateLabel(Properties, IsHud)
@@ -162,7 +173,16 @@ function Library:CreateLabel(Properties, IsHud)
 end;
 
 function Library:MakeDraggable(Instance, Cutoff)
+    local Goal
     Instance.Active = true;
+
+    RenderStepped:Connect(function()
+        if not (Goal) then
+            return;
+        end
+
+        Instance.Position = Instance.Position:Lerp(Goal, .5)
+    end)
 
     Instance.InputBegan:Connect(function(Input)
         if Input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -176,12 +196,12 @@ function Library:MakeDraggable(Instance, Cutoff)
             end;
 
             while InputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) do
-                Instance.Position = UDim2.new(
+                Goal = UDim2.new(
                     0,
                     Mouse.X - ObjPos.X + (Instance.Size.X.Offset * Instance.AnchorPoint.X),
                     0,
                     Mouse.Y - ObjPos.Y + (Instance.Size.Y.Offset * Instance.AnchorPoint.Y)
-                );
+                )
 
                 RenderStepped:Wait();
             end;
@@ -237,7 +257,7 @@ function Library:AddToolTip(InfoStr, HoverInstance)
 
         while IsHovering do
             RunService.Heartbeat:Wait()
-            Tooltip.Position = UDim2.fromOffset(Mouse.X + 15, Mouse.Y + 12)
+            Tooltip.Position = Tooltip.Position:Lerp(UDim2.fromOffset(Mouse.X + 15, Mouse.Y + 12), .5)
         end
     end)
 
