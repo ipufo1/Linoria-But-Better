@@ -37,14 +37,13 @@ local Library = {
     RiskColor = Color3.fromRGB(255, 50, 50),
 
     Black = Color3.new(0, 0, 0);
-    Font = Enum.Font.Code,
+    Font = Font.fromEnum(Enum.Font.RobotoMono),
 
     OpenedFrames = {};
     DependencyBoxes = {};
 
     Signals = {};
     ScreenGui = ScreenGui;
-
 
     IsRainbow = false;
 };
@@ -181,7 +180,7 @@ function Library:MakeDraggable(Instance, Cutoff)
             return;
         end
 
-        Instance.Position = Instance.Position:Lerp(Goal, .5)
+        Instance.Position = Instance.Position:Lerp(Goal, .1)
     end)
 
     Instance.InputBegan:Connect(function(Input)
@@ -1355,7 +1354,7 @@ end;
 
 local BaseGroupbox = {};
 
-do
+do -- base stuff
     local Funcs = {};
 
     function Funcs:AddBlank(Size)
@@ -3075,7 +3074,7 @@ function Library:CreateWindow(...)
     });
 
     function Window:SetWindowTitle(Title)
-        WindowLabel.Text = Title;
+        WindowLabel.Text = Title or ('ligma');
     end;
 
     function Window:AddTab(Name)
