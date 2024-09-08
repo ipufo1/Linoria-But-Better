@@ -1300,7 +1300,9 @@ do
             end;
         end);
 
-        Library:GiveSignal(InputService.InputBegan:Connect(function(Input)
+        Library:GiveSignal(InputService.InputBegan:Connect(function(Input, Focused)
+            if Focused then return end
+
             if (not Picking) then
                 if KeyPicker.Mode == 'Toggle' then
                     local Key = KeyPicker.Value;
@@ -1333,7 +1335,9 @@ do
             end;
         end))
 
-        Library:GiveSignal(InputService.InputEnded:Connect(function(Input)
+        Library:GiveSignal(InputService.InputEnded:Connect(function(Input, Focused)
+            if Focused then return end
+
             if (not Picking) then
                 KeyPicker:Update();
             end;
@@ -3652,4 +3656,4 @@ Players.PlayerAdded:Connect(OnPlayerChange);
 Players.PlayerRemoving:Connect(OnPlayerChange);
 
 getgenv().Library = Library
-return Library
+return Library, Options
