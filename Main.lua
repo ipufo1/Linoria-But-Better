@@ -1,3 +1,51 @@
+--> insert fonthaha
+warn('Nigga')
+local function create_font_table(name, faces : { name: string, weight: number, style: string, assetId: string })
+    local new_faces = {{
+        name = faces.name or 'Regular',
+        weight = faces.weight or 400,
+        style = faces.style or 'normal',
+        assetId = faces.assetId or ''
+
+    }}
+    return {
+        name = name or 'UnnamedFont',
+        faces = new_faces
+    }
+end
+
+local syn = {}
+function syn.__securecall(func)
+    return pcall(func)
+end
+
+--> im too lazy to manually change the stuff so yaa
+
+local function create_font(font_data: string)
+    local path = game.GetService(game, 'HttpService').GenerateGUID(game.GetService(game, 'HttpService'), false):lower():gsub('-', '')
+
+    if not isfolder('fonts') then
+        makefolder('fonts')
+    end
+
+    syn.__securecall(function()
+        delfile(`fonts/{path}.ttf`)
+        delfile(`fonts/{path}.json`)
+    end)
+
+    writefile(`fonts/{path}.ttf`, crypt.base64.encode(font_data))
+
+    local font_table = create_font_table(path, {
+        assetId = getcustomasset(`fonts/{path}.ttf`)
+    })
+
+    writefile(`fonts/{path}.json`, game.GetService(game, 'HttpService'):JSONEncode(font_table))
+
+    return Font.new(
+        getcustomasset(`fonts/{path}.json`), Enum.FontWeight.Regular
+    )
+end
+
 local InputService = game:GetService('UserInputService');
 local TextService = game:GetService('TextService');
 local CoreGui = game:GetService('CoreGui');
@@ -37,7 +85,7 @@ local Library = {
     RiskColor = Color3.fromRGB(255, 50, 50),
 
     Black = Color3.new(0, 0, 0);
-    Font = Enum.Font.RobotoMono,
+    Font = Enum.Font.Code,
 
     OpenedFrames = {};
     DependencyBoxes = {};
@@ -2971,7 +3019,7 @@ function Library:CreateWindow(...)
     if type(Config.MenuFadeTime) ~= 'number' then Config.MenuFadeTime = 0.2 end
 
     if typeof(Config.Position) ~= 'UDim2' then Config.Position = UDim2.fromOffset(175, 50) end
-    if typeof(Config.Size) ~= 'UDim2' then Config.Size = UDim2.fromOffset(550, 600) end
+    if typeof(Config.Size) ~= 'UDim2' then Config.Size = UDim2.fromOffset(550 / 4, 600 / 4) end
 
     if Config.Center then
         Config.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -3081,6 +3129,8 @@ function Library:CreateWindow(...)
         WindowLabel.Text = Title or ('ligma');
     end;
 
+
+    local TabCount = 0
     function Window:AddTab(Name)
         local Tab = {
             Groupboxes = {};
@@ -3096,6 +3146,11 @@ function Library:CreateWindow(...)
             ZIndex = 1;
             Parent = TabArea;
         });
+
+        TabCount += 1
+        RunService.PreRender:Connect(function()
+            TabButton.Size = UDim2.new(0, TabArea.AbsoluteSize.X / TabCount, 1, 0)
+        end)
 
         Library:AddToRegistry(TabButton, {
             BackgroundColor3 = 'BackgroundColor';
