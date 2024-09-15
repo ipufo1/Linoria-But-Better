@@ -1,51 +1,4 @@
 --> insert fonthaha
-warn('Nigga')
-local function create_font_table(name, faces : { name: string, weight: number, style: string, assetId: string })
-    local new_faces = {{
-        name = faces.name or 'Regular',
-        weight = faces.weight or 400,
-        style = faces.style or 'normal',
-        assetId = faces.assetId or ''
-
-    }}
-    return {
-        name = name or 'UnnamedFont',
-        faces = new_faces
-    }
-end
-
-local syn = {}
-function syn.__securecall(func)
-    return pcall(func)
-end
-
---> im too lazy to manually change the stuff so yaa
-
-local function create_font(font_data: string)
-    local path = game.GetService(game, 'HttpService').GenerateGUID(game.GetService(game, 'HttpService'), false):lower():gsub('-', '')
-
-    if not isfolder('fonts') then
-        makefolder('fonts')
-    end
-
-    syn.__securecall(function()
-        delfile(`fonts/{path}.ttf`)
-        delfile(`fonts/{path}.json`)
-    end)
-
-    writefile(`fonts/{path}.ttf`, crypt.base64.encode(font_data))
-
-    local font_table = create_font_table(path, {
-        assetId = getcustomasset(`fonts/{path}.ttf`)
-    })
-
-    writefile(`fonts/{path}.json`, game.GetService(game, 'HttpService'):JSONEncode(font_table))
-
-    return Font.new(
-        getcustomasset(`fonts/{path}.json`), Enum.FontWeight.Regular
-    )
-end
-
 local InputService = game:GetService('UserInputService');
 local TextService = game:GetService('TextService');
 local CoreGui = game:GetService('CoreGui');
@@ -3711,4 +3664,5 @@ Players.PlayerAdded:Connect(OnPlayerChange);
 Players.PlayerRemoving:Connect(OnPlayerChange);
 
 getgenv().Library = Library
+Library:Notify('Successfully loaded!', 10)
 return Library, Options
