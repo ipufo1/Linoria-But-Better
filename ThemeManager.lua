@@ -65,7 +65,7 @@ local ThemeManager = {} do
 		end
 
 		if isDefault then
-			Options.ThemeManager_ThemeList:SetValue(theme)
+			Options.ThemeManager_ThemeList:SetValue('BBot')
 		else
 			self:ApplyTheme(theme)
 		end
