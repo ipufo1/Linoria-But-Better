@@ -227,7 +227,7 @@ function Library:MakeDraggable(Instance, Cutoff)
             return;
         end
 
-        Instance.Position = Instance.Position:Lerp(Goal, .05)
+        Instance.Position = Instance.Position:Lerp(Goal, .5)
     end)
 
     Instance.InputBegan:Connect(function(Input)
