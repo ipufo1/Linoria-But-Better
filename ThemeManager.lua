@@ -49,7 +49,7 @@ local ThemeManager = {} do
 	end
 
 	function ThemeManager:LoadDefault()		
-		local theme = 'Tokyo Night'
+		local theme = 'Default'
 		local content = isfile(self.Folder .. '/themes/default.txt') and readfile(self.Folder .. '/themes/default.txt')
 
 		local isDefault = true
@@ -113,12 +113,6 @@ local ThemeManager = {} do
 			Options.ThemeManager_CustomThemeList:SetValue(nil)
 		end):AddButton('Load theme', function() 
 			self:ApplyTheme(Options.ThemeManager_CustomThemeList.Value) 
-		end)
-
-		groupbox:AddButton('Set as default', function()
-			self:SaveDefault(Options.ThemeManager_CustomThemeList.Value)
-			self.Library:Notify(string.format('Set default custom 
-						theme to %q', Options.ThemeManager_ThemeList.Value))
 		end)
 
 		groupbox:AddButton('Refresh list', function()
