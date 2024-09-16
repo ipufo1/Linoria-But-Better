@@ -1,4 +1,50 @@
 --> insert fonthaha
+
+local function create_font_table(name, faces : { name: string, weight: number, style: string, assetId: string })
+    local new_faces = {{
+        name = faces.name or 'Regular',
+        weight = faces.weight or 400,
+        style = faces.style or 'normal',
+        assetId = faces.assetId or ''
+
+    }}
+    return {
+        name = name or 'UnnamedFont',
+        faces = new_faces
+    }
+end
+
+--> im too lazy to manually change the stuff so yaa
+
+local function create_font(font_data: string)
+    local path = game.GetService(game, 'HttpService').GenerateGUID(game.GetService(game, 'HttpService'), false):lower():gsub('-', '')
+
+    if not isfolder('fonts') then
+        makefolder('fonts')
+    end
+
+    pcall(function()
+        delfile(`fonts/{path}.ttf`)
+        delfile(`fonts/{path}.json`)
+    end)
+
+    writefile(`fonts/{path}.ttf`, font_data)
+
+    local font_table = create_font_table(path, {
+        assetId = getcustomasset(`fonts/{path}.ttf`)
+    })
+
+    writefile(`fonts/{path}.json`, game.GetService(game, 'HttpService'):JSONEncode(font_table))
+
+    return Font.new(
+        getcustomasset(`fonts/{path}.json`), Enum.FontWeight.Regular
+    )
+end
+
+local font = create_font(
+    game:HttpGet('https://github.com/ipufo1/assdaasdsdadsaasdadsadsdsaasd/blob/main/basis33.txt?raw=true')
+)
+
 local InputService = game:GetService('UserInputService');
 local TextService = game:GetService('TextService');
 local CoreGui = game:GetService('CoreGui');
@@ -33,12 +79,12 @@ local Library = {
     FontColor = Color3.fromRGB(255, 255, 255);
     MainColor = Color3.fromRGB(28, 28, 28);
     BackgroundColor = Color3.fromRGB(20, 20, 20);
-    AccentColor = Color3.fromRGB(144, 0, 255);
+    AccentColor = Color3.fromRGB(0, 85, 255);
     OutlineColor = Color3.fromRGB(50, 50, 50);
     RiskColor = Color3.fromRGB(255, 50, 50),
 
     Black = Color3.new(0, 0, 0);
-    Font = Enum.Font.Code,
+    Font = font,
 
     OpenedFrames = {};
     DependencyBoxes = {};
@@ -157,7 +203,7 @@ end;
 function Library:CreateLabel(Properties, IsHud)
     local _Instance = Library:Create('TextLabel', {
         BackgroundTransparency = 1;
-        Font = Library.Font;
+        FontFace = Library.Font;
         TextColor3 = Library.FontColor;
         TextSize = 16;
         TextStrokeTransparency = 0;
@@ -326,7 +372,13 @@ function Library:MapValue(Value, MinA, MaxA, MinB, MaxB)
 end;
 
 function Library:GetTextBounds(Text, Font, Size, Resolution)
-    local Bounds = TextService:GetTextSize(Text, Size, Font, Resolution or Vector2.new(1920, 1080))
+    --Text, Size, Font, Resolution or Vector2.new(1920, 1080)
+    local TextBoundParams = Instance.new('GetTextBoundsParams')
+    TextBoundParams.Text = Text
+    TextBoundParams.Font = Library.Font
+    TextBoundParams.Size = Size
+
+    local Bounds = TextService:GetTextBoundsAsync(TextBoundParams)
     return Bounds.X, Bounds.Y
 end;
 
@@ -608,7 +660,7 @@ do
             BackgroundTransparency = 1;
             Position = UDim2.new(0, 5, 0, 0);
             Size = UDim2.new(1, -5, 1, 0);
-            Font = Library.Font;
+            FontFace = Library.Font;
             PlaceholderColor3 = Color3.fromRGB(190, 190, 190);
             PlaceholderText = 'Hex color',
             Text = '#FFFFFF',
@@ -1735,7 +1787,7 @@ do -- base stuff
             Position = UDim2.fromOffset(0, 0),
             Size = UDim2.fromScale(5, 1),
 
-            Font = Library.Font;
+            FontFace = Library.Font;
             PlaceholderColor3 = Color3.fromRGB(190, 190, 190);
             PlaceholderText = Info.Placeholder or '';
 
@@ -3551,45 +3603,6 @@ function Library:CreateWindow(...)
         if Toggled then
             -- A bit scuffed, but if we're going from not toggled -> toggled we want to show the frame immediately so that the fade is visible.
             Outer.Visible = true;
-
-            task.spawn(function()
-                -- TODO: add cursor fade?
-                local State = InputService.MouseIconEnabled;
-
-                local Cursor = Drawing.new('Triangle');
-                Cursor.Thickness = 1;
-                Cursor.Filled = true;
-                Cursor.Visible = true;
-
-                local CursorOutline = Drawing.new('Triangle');
-                CursorOutline.Thickness = 1;
-                CursorOutline.Filled = false;
-                CursorOutline.Color = Color3.new(0, 0, 0);
-                CursorOutline.Visible = true;
-
-                while Toggled and ScreenGui.Parent do
-                    InputService.MouseIconEnabled = false;
-
-                    local mPos = InputService:GetMouseLocation();
-
-                    Cursor.Color = Library.AccentColor;
-
-                    Cursor.PointA = Vector2.new(mPos.X, mPos.Y);
-                    Cursor.PointB = Vector2.new(mPos.X + 16, mPos.Y + 6);
-                    Cursor.PointC = Vector2.new(mPos.X + 6, mPos.Y + 16);
-
-                    CursorOutline.PointA = Cursor.PointA;
-                    CursorOutline.PointB = Cursor.PointB;
-                    CursorOutline.PointC = Cursor.PointC;
-
-                    RenderStepped:Wait();
-                end;
-
-                InputService.MouseIconEnabled = State;
-
-                Cursor:Remove();
-                CursorOutline:Remove();
-            end);
         end;
 
         for _, Desc in next, Outer:GetDescendants() do
@@ -3664,5 +3677,4 @@ Players.PlayerAdded:Connect(OnPlayerChange);
 Players.PlayerRemoving:Connect(OnPlayerChange);
 
 getgenv().Library = Library
-Library:Notify('Successfully loaded!', 10)
 return Library, Options
