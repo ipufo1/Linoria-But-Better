@@ -2765,7 +2765,7 @@ do
     });
 
     Library:Create('UIListLayout', {
-        Padding = UDim.new(0, 4);
+        Padding = UDim.new(0, 1);
         FillDirection = Enum.FillDirection.Vertical;
         SortOrder = Enum.SortOrder.LayoutOrder;
         Parent = Library.NotificationArea;
@@ -2922,14 +2922,20 @@ function Library:Notify(Text, Time)
 
     YSize = YSize + 7
 
-    local NotifyOuter = Library:Create('Frame', {
+    local Fake = Library:Create('Frame', {
         BorderColor3 = Color3.new(0, 0, 0);
         Position = UDim2.new(0, 100, 0, 10);
-        Size = UDim2.new(0, 0, 0, YSize);
+        Size = UDim2.new(0, XSize+8+4, 0, YSize);
         ClipsDescendants = true;
         ZIndex = 100;
         Parent = Library.NotificationArea;
+        BackgroundTransparency = 1;
     });
+
+    local NotifyOuter =Fake:Clone()
+    NotifyOuter.Size = UDim2.new(0, 0, 0, YSize)
+    NotifyOuter.Position = Library.NotificationArea.Position
+    NotifyOuter.Parent = Library.ScreenGui
 
     local NotifyInner = Library:Create('Frame', {
         BackgroundColor3 = Library.MainColor;
@@ -2997,6 +3003,13 @@ function Library:Notify(Text, Time)
 
     pcall(NotifyOuter.TweenSize, NotifyOuter, UDim2.new(0, XSize + 8 + 4, 0, YSize), 'Out', 'Quad', 0.4, true);
 
+    RunService.PreRender:Connect(function()
+        NotifyOuter.Position = NotifyOuter.Position:Lerp(
+            UDim2.fromOffset(Fake.AbsolutePosition.X, Fake.AbsolutePosition.Y),
+            .1
+        )
+    end)
+
     task.spawn(function()
         wait(Time or 5);
 
@@ -3005,6 +3018,7 @@ function Library:Notify(Text, Time)
         wait(0.4);
 
         NotifyOuter:Destroy();
+        Fake:Destroy()
     end);
 end;
 
