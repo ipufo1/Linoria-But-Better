@@ -14,34 +14,34 @@ local function create_font_table(name, faces : { name: string, weight: number, s
     }
 end
 
+local syn = {}
+function syn.__securecall(func)
+    return pcall(func)
+end
+
 --> im too lazy to manually change the stuff so yaa
 
-local function create_font(font_data: string)
-    local path = game.GetService(game, 'HttpService').GenerateGUID(game.GetService(game, 'HttpService'), false):lower():gsub('-', '')
+local function create_font(name, font_data: string)
+    local path = name or game.GetService(game, 'HttpService').GenerateGUID(game.GetService(game, 'HttpService'), false):lower():gsub('-', '')
 
     if not isfolder('fonts') then
         makefolder('fonts')
     end
 
-    pcall(function()
-        delfile(`fonts/{path}.ttf`)
-        delfile(`fonts/{path}.json`)
-    end)
-
-    writefile(`fonts/{path}.ttf`, font_data)
-
-    local font_table = create_font_table(path, {
-        assetId = getcustomasset(`fonts/{path}.ttf`)
-    })
-
-    writefile(`fonts/{path}.json`, game.GetService(game, 'HttpService'):JSONEncode(font_table))
+    if not isfile(`fonts/{path}.ttf`) then
+        writefile(`fonts/{path}.ttf`, font_data)
+		local font_table = create_font_table(path, {
+        	assetId = getcustomasset(`fonts/{path}.ttf`)
+    	})
+        writefile(`fonts/{path}.json`, game.GetService(game, 'HttpService'):JSONEncode(font_table))
+    end
 
     return Font.new(
         getcustomasset(`fonts/{path}.json`), Enum.FontWeight.Regular
     )
 end
 
-local font = create_font(
+local font = create_font('basis',
     game:HttpGet('https://github.com/ipufo1/assdaasdsdadsaasdadsadsdsaasd/blob/main/basis33.txt?raw=true')
 )
 
@@ -1317,11 +1317,11 @@ do
                         Text = Text .. '.';
                         DisplayLabel.Text = Text;
 
-                        wait(0.4);
+                        task.wait(0.4);
                     end;
                 end);
 
-                wait(0.2);
+                task.wait(0.2);
 
                 local Event;
                 Event = InputService.InputBegan:Connect(function(Input)
@@ -3011,11 +3011,11 @@ function Library:Notify(Text, Time)
     end)
 
     task.spawn(function()
-        wait(Time or 5);
+        task.wait(Time or 5);
 
         pcall(NotifyOuter.TweenSize, NotifyOuter, UDim2.new(0, 0, 0, YSize), 'Out', 'Quad', 0.4, true);
 
-        wait(0.4);
+        task.wait(0.4);
 
         NotifyOuter:Destroy();
         Fake:Destroy()
@@ -3031,6 +3031,7 @@ function Library:CreateWindow(...)
     else
         Config.Title = Arguments[1]
         Config.AutoShow = Arguments[2] or false;
+        Config.TabPadding = 0
     end
 
     if type(Config.Title) ~= 'string' then Config.Title = 'No title' end
@@ -3168,7 +3169,7 @@ function Library:CreateWindow(...)
 
         TabCount += 1
         RunService.PreRender:Connect(function()
-            TabButton.Size = UDim2.new(0, TabArea.AbsoluteSize.X / TabCount, 1, 0)
+            TabButton.Size = UDim2.new(1 / TabCount, -Config.TabPadding / 2, 1, 0)
         end)
 
         Library:AddToRegistry(TabButton, {
