@@ -3696,4 +3696,4 @@ Players.PlayerAdded:Connect(OnPlayerChange);
 Players.PlayerRemoving:Connect(OnPlayerChange);
 
 getgenv().Library = Library
-return Library, Options
+return Library, Options, Toggles
